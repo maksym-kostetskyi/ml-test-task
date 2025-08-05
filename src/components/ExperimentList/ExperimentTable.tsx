@@ -12,26 +12,53 @@ import type { ProcessedExperiment } from "../../types/experiment.types";
 import { formatValue } from "../../utils/chartHelpers";
 
 const ExperimentTable: React.FC = () => {
-  const {
-    experiments,
-    selectedExperiments,
-    toggleExperimentSelection,
-    selectAllExperiments,
-    clearSelection,
-  } = useExperimentStore();
+  // Use separate selectors to ensure proper reactivity
+  const experiments = useExperimentStore((state) => state.experiments);
+  const selectedExperiments = useExperimentStore(
+    (state) => state.selectedExperiments
+  );
+  const toggleExperimentSelection = useExperimentStore(
+    (state) => state.toggleExperimentSelection
+  );
+  const selectExperiments = useExperimentStore(
+    (state) => state.selectExperiments
+  );
 
   const [globalFilter, setGlobalFilter] = useState<string>("");
+
+  // Force re-render when selectedExperiments changes
+  const selectedCount = selectedExperiments.length;
 
   const filteredExperiments = useMemo(() => {
     if (!globalFilter) return experiments;
 
-    return experiments.filter(
-      (exp) =>
-        exp.id.toLowerCase().includes(globalFilter.toLowerCase()) ||
-        exp.metrics.some((metric) =>
-          metric.toLowerCase().includes(globalFilter.toLowerCase())
-        )
-    );
+    const searchTerm = globalFilter.toLowerCase().trim();
+
+    return experiments.filter((exp) => {
+      // Search in experiment ID
+      if (exp.id.toLowerCase().includes(searchTerm)) {
+        return true;
+      }
+
+      // Search in metrics names
+      if (
+        exp.metrics.some((metric) => metric.toLowerCase().includes(searchTerm))
+      ) {
+        return true;
+      }
+
+      // Search in total steps (convert to string)
+      if (exp.totalSteps.toString().includes(searchTerm)) {
+        return true;
+      }
+
+      // Search in data points count
+      if (exp.dataPoints.length.toString().includes(searchTerm)) {
+        return true;
+      }
+
+      return false;
+    });
   }, [experiments, globalFilter]);
 
   const isAllSelected = useMemo(() => {
@@ -43,43 +70,38 @@ const ExperimentTable: React.FC = () => {
 
   const handleSelectAll = () => {
     if (isAllSelected) {
-      // Deselect all filtered experiments
+      // Deselect all filtered experiments - keep only non-filtered selections
       const filteredIds = filteredExperiments.map((exp) => exp.id);
-      filteredIds.forEach((id) => {
-        if (selectedExperiments.includes(id)) {
-          toggleExperimentSelection(id);
-        }
-      });
+      const newSelection = selectedExperiments.filter(
+        (id) => !filteredIds.includes(id)
+      );
+      selectExperiments(newSelection);
     } else {
-      // Select all filtered experiments
-      filteredExperiments.forEach((exp) => {
-        if (!selectedExperiments.includes(exp.id)) {
-          toggleExperimentSelection(exp.id);
-        }
-      });
+      // Select all filtered experiments - add to existing selection
+      const filteredIds = filteredExperiments.map((exp) => exp.id);
+      const newSelection = [
+        ...new Set([...selectedExperiments, ...filteredIds]),
+      ];
+      selectExperiments(newSelection);
     }
   };
 
   const selectionTemplate = (rowData: ProcessedExperiment) => {
+    const isSelected = selectedExperiments.includes(rowData.id);
+
     return (
       <Checkbox
-        checked={selectedExperiments.includes(rowData.id)}
+        key={`${rowData.id}-${selectedCount}-${isSelected}`}
+        checked={isSelected}
         onChange={() => toggleExperimentSelection(rowData.id)}
       />
     );
-  };
-
-  const headerSelectionTemplate = () => {
-    return <Checkbox checked={isAllSelected} onChange={handleSelectAll} />;
   };
 
   const experimentIdTemplate = (rowData: ProcessedExperiment) => {
     return (
       <div className="flex align-items-center">
         <span className="font-medium">{rowData.id}</span>
-        {selectedExperiments.includes(rowData.id) && (
-          <Badge value="Selected" severity="success" className="ml-2" />
-        )}
       </div>
     );
   };
@@ -145,29 +167,22 @@ const ExperimentTable: React.FC = () => {
       </div>
       <div className="flex gap-2">
         <span className="p-input-icon-left">
-          <i className="pi pi-search" />
+          <i className="pi pi-search" style={{ left: "0.75rem" }} />
           <InputText
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder="Search experiments..."
-            className="w-20rem"
+            className="w-20rem pl-6"
           />
         </span>
         <Button
-          label="Select All"
-          icon="pi pi-check"
-          onClick={selectAllExperiments}
+          label={isAllSelected ? "Deselect All" : "Select All"}
+          icon={isAllSelected ? "pi pi-times" : "pi pi-check"}
+          onClick={handleSelectAll}
           className="p-button-outlined"
+          severity={isAllSelected ? "secondary" : "success"}
           size="small"
           disabled={experiments.length === 0}
-        />
-        <Button
-          label="Clear"
-          icon="pi pi-times"
-          onClick={clearSelection}
-          className="p-button-outlined p-button-secondary"
-          size="small"
-          disabled={selectedExperiments.length === 0}
         />
       </div>
     </div>
@@ -185,23 +200,30 @@ const ExperimentTable: React.FC = () => {
   }
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4" bodyClassName="p-0">
       <DataTable
+        key={`datatable-${selectedCount}`} // Force re-render when selection changes
         value={filteredExperiments}
         header={header}
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 25, 50]}
-        globalFilter={globalFilter}
-        emptyMessage="No experiments found"
+        emptyMessage={
+          globalFilter
+            ? `No experiments match "${globalFilter}"`
+            : "No experiments found"
+        }
         className="p-datatable-striped"
+        tableStyle={{
+          borderTop: "none",
+          borderBottom: "none",
+        }}
         size="small"
       >
         <Column
-          selectionMode="multiple"
           headerStyle={{ width: "3rem" }}
           body={selectionTemplate}
-          header={headerSelectionTemplate}
+          header="Select"
         />
         <Column
           field="id"

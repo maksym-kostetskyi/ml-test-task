@@ -7,6 +7,7 @@ interface ExperimentStore extends AppState {
   setExperiments: (experiments: ProcessedExperiment[]) => void;
   toggleExperimentSelection: (experimentId: string) => void;
   selectAllExperiments: () => void;
+  selectExperiments: (experimentIds: string[]) => void;
   clearSelection: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -47,13 +48,17 @@ export const useExperimentStore = create<ExperimentStore>()(
           experiments,
           error: null,
           isLargeDataset: isLarge,
-          // Auto-select first experiment if none selected
+          // Clean up selectedExperiments - only keep IDs that exist in new experiments
           selectedExperiments:
-            experiments.length > 0 && get().selectedExperiments.length === 0
-              ? [experiments[0].id]
-              : get().selectedExperiments.filter((id) =>
+            get().selectedExperiments.filter((id) =>
+              experiments.some((exp) => exp.id === id)
+            ).length > 0
+              ? get().selectedExperiments.filter((id) =>
                   experiments.some((exp) => exp.id === id)
-                ),
+                )
+              : experiments.length > 0
+              ? [experiments[0].id] // Auto-select first if nothing valid selected
+              : [],
         });
       },
 
@@ -71,6 +76,15 @@ export const useExperimentStore = create<ExperimentStore>()(
       selectAllExperiments: () => {
         const { experiments } = get();
         set({ selectedExperiments: experiments.map((exp) => exp.id) });
+      },
+
+      selectExperiments: (experimentIds) => {
+        // Validate that all provided IDs exist in current experiments
+        const { experiments } = get();
+        const validIds = experimentIds.filter((id) =>
+          experiments.some((exp) => exp.id === id)
+        );
+        set({ selectedExperiments: validIds });
       },
 
       clearSelection: () => {

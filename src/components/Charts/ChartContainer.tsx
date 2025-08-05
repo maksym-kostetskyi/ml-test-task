@@ -17,7 +17,7 @@ const ChartContainer: React.FC = () => {
 
   if (experiments.length === 0) {
     return (
-      <Card title="Visualizations" className="mb-4">
+      <Card title="Visualizations" className="mb-4 p-4">
         <div className="text-center p-4 text-color-secondary">
           <i className="pi pi-chart-line text-4xl mb-3"></i>
           <p>No experiments loaded. Please upload a CSV file first.</p>
@@ -28,7 +28,7 @@ const ChartContainer: React.FC = () => {
 
   if (selectedExperiments.length === 0) {
     return (
-      <Card title="Visualizations" className="mb-4">
+      <Card title="Visualizations" className="mb-4 p-4">
         <Message
           severity="info"
           text="Please select one or more experiments to view charts"
@@ -47,7 +47,7 @@ const ChartContainer: React.FC = () => {
 
   if (availableMetrics.length === 0) {
     return (
-      <Card title="Visualizations" className="mb-4">
+      <Card title="Visualizations" className="mb-4 p-4">
         <Message
           severity="warn"
           text="Selected experiments have no metrics to display"
@@ -58,7 +58,7 @@ const ChartContainer: React.FC = () => {
   }
 
   return (
-    <div className="chart-container">
+    <div className="chart-container p-4">
       <div className="mb-4">
         <h2 className="text-2xl font-bold mb-2">Experiment Metrics</h2>
         <p className="text-color-secondary">

@@ -161,7 +161,7 @@ const MetricChart: React.FC<MetricChartProps> = ({ metricName }) => {
   );
 
   return (
-    <Card header={cardHeader} className="mb-4">
+    <Card header={cardHeader} className="mb-4 p-3">
       <div style={{ width: "100%", height: "400px" }}>
         <ResponsiveContainer>
           <LineChart
