@@ -200,7 +200,7 @@ const ExperimentTable: React.FC = () => {
   }
 
   return (
-    <Card className="mb-4" bodyClassName="p-0">
+    <Card className="mb-4">
       <DataTable
         key={`datatable-${selectedCount}`} // Force re-render when selection changes
         value={filteredExperiments}
