@@ -38,6 +38,31 @@ const MetricChart: React.FC<MetricChartProps> = ({ metricName }) => {
     return generateChartColors(selectedExperimentDetails.length);
   }, [selectedExperimentDetails.length]);
 
+  // Calculate data density info for user feedback
+  const dataDensityInfo = useMemo(() => {
+    const totalDataPoints = selectedExperimentDetails.reduce((sum, exp) => {
+      return (
+        sum +
+        exp.dataPoints.filter((dp) => dp.metric_name === metricName).length
+      );
+    }, 0);
+
+    const displayedPoints = chartData.length;
+    const isDownsampled =
+      totalDataPoints > displayedPoints * selectedExperimentDetails.length;
+
+    return {
+      totalDataPoints,
+      displayedPoints,
+      isDownsampled,
+      samplingRatio:
+        totalDataPoints > 0
+          ? (displayedPoints * selectedExperimentDetails.length) /
+            totalDataPoints
+          : 1,
+    };
+  }, [chartData, selectedExperimentDetails, metricName]);
+
   const customTooltip = ({
     active,
     payload,
@@ -63,6 +88,12 @@ const MetricChart: React.FC<MetricChartProps> = ({ metricName }) => {
               {formatValue(entry.value)}
             </p>
           ))}
+          {dataDensityInfo.isDownsampled && (
+            <p className="text-xs text-color-secondary mt-2 mb-0">
+              <i className="pi pi-info-circle mr-1"></i>
+              Smart sampling applied
+            </p>
+          )}
         </div>
       );
     }
@@ -103,7 +134,20 @@ const MetricChart: React.FC<MetricChartProps> = ({ metricName }) => {
 
   const cardHeader = (
     <div className="flex justify-content-between align-items-center">
-      <h4 className="m-0">{formatMetricName(metricName)}</h4>
+      <div>
+        <h4 className="m-0">{formatMetricName(metricName)}</h4>
+        {chartData.length > 0 && (
+          <small className="text-color-secondary">
+            Steps {chartData[0].step} - {chartData[chartData.length - 1].step}
+            {dataDensityInfo.isDownsampled && (
+              <span className="ml-2">
+                <i className="pi pi-chart-line mr-1"></i>
+                Optimized view ({chartData.length} points)
+              </span>
+            )}
+          </small>
+        )}
+      </div>
       <div className="flex gap-2">
         <Button
           icon="pi pi-download"
@@ -129,9 +173,14 @@ const MetricChart: React.FC<MetricChartProps> = ({ metricName }) => {
               dataKey="step"
               type="number"
               domain={["dataMin", "dataMax"]}
-              tickFormatter={(value) => value.toString()}
+              tickFormatter={(value) => `Step ${value}`}
+              tick={{ fontSize: 12 }}
             />
-            <YAxis tickFormatter={formatValue} />
+            <YAxis
+              tickFormatter={formatValue}
+              tick={{ fontSize: 12 }}
+              width={60}
+            />
             <Tooltip content={customTooltip} />
             <Legend />
             {selectedExperimentDetails.map((experiment, index) => (
@@ -140,9 +189,9 @@ const MetricChart: React.FC<MetricChartProps> = ({ metricName }) => {
                 type="monotone"
                 dataKey={experiment.id}
                 stroke={colors[index]}
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
+                strokeWidth={2.5}
+                dot={{ r: 4, strokeWidth: 2 }}
+                activeDot={{ r: 6, strokeWidth: 2 }}
                 connectNulls={false}
               />
             ))}
@@ -152,9 +201,22 @@ const MetricChart: React.FC<MetricChartProps> = ({ metricName }) => {
 
       {selectedExperimentDetails.length > 0 && (
         <div className="mt-3 p-3 bg-gray-50 border-round">
-          <small className="text-color-secondary block mb-2">
-            Selected Experiments:
-          </small>
+          <div className="flex justify-content-between align-items-start mb-2">
+            <small className="text-color-secondary">
+              Selected Experiments:
+            </small>
+            {dataDensityInfo.isDownsampled && (
+              <small className="text-color-secondary">
+                <i className="pi pi-info-circle mr-1"></i>
+                Showing {dataDensityInfo.displayedPoints} of{" "}
+                {Math.floor(
+                  dataDensityInfo.totalDataPoints /
+                    selectedExperimentDetails.length
+                )}{" "}
+                steps (Smart sampling applied)
+              </small>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {selectedExperimentDetails.map((exp, index) => (
               <div key={exp.id} className="flex align-items-center gap-1">

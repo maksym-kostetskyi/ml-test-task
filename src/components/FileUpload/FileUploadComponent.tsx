@@ -11,7 +11,8 @@ import { useExperimentStore } from "../../store/experimentStore";
 const FileUploadComponent: React.FC = () => {
   const fileUploadRef = useRef<FileUpload>(null);
   const { parseCSVFile, uploadState, clearUploadState } = useCSVParser();
-  const { experiments, uploadedFile, clearData } = useExperimentStore();
+  const { experiments, uploadedFile, clearData, isLargeDataset } =
+    useExperimentStore();
 
   const handleFileSelect = async (event: FileUploadHandlerEvent) => {
     const file = event.files[0];
@@ -115,6 +116,14 @@ const FileUploadComponent: React.FC = () => {
                     0
                   )}
                 </p>
+                {isLargeDataset && (
+                  <p className="m-0 text-sm text-orange-600">
+                    <i className="pi pi-info-circle mr-1"></i>
+                    <strong>Large Dataset:</strong> Data won't persist across
+                    browser sessions to avoid storage limits. Charts use smart
+                    sampling for optimal performance.
+                  </p>
+                )}
               </div>
               <Button
                 label="Upload New File"

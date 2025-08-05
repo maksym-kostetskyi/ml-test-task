@@ -14,10 +14,13 @@ A React-based web application for uploading, inspecting, and comparing machine l
 ### Advanced Features
 
 - **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
-- **💾 Data Persistence**: Uploaded data persists across browser sessions
+- **💾 Data Persistence**: Uploaded data persists across browser sessions (small datasets only)
+- **🗄️ Smart Storage**: Large datasets (>10K points) don't persist to avoid browser storage limits
 - **📥 Export Capabilities**: Export chart data as CSV
 - **🎨 Professional UI**: Clean, modern interface using PrimeReact components
 - **⚡ Performance Optimized**: Efficient data processing and visualization
+- **🧠 Smart Sampling**: MLflow-style adaptive step sampling for large datasets (25K+ points → ~25 optimized points)
+- **📊 Data Density Indicators**: Visual feedback when data sampling is applied
 
 ## Technology Stack
 

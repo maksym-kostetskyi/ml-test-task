@@ -3,6 +3,47 @@ import type {
   ChartDataPoint,
 } from "../types/experiment.types";
 
+/**
+ * Smart step sampling for large datasets - MLflow style
+ * Returns optimal step indices to show ~maxPoints while preserving trend
+ *
+ * Example: For 1000 steps with maxPoints=25:
+ * Input:  [0,1,2,3,4,5,...,998,999]
+ * Output: [0,40,80,120,160,200,240,280,320,360,400,440,480,520,560,600,640,680,720,760,800,840,880,920,960,999]
+ */
+export const sampleSteps = (
+  steps: number[],
+  maxPoints: number = 25
+): number[] => {
+  if (steps.length <= maxPoints) {
+    return steps; // Return all steps if dataset is small
+  }
+
+  const sampled: number[] = [];
+  const stepCount = steps.length;
+
+  // Always include first and last steps
+  sampled.push(steps[0]);
+
+  if (stepCount > 2) {
+    // Calculate interval for middle points
+    const middlePoints = maxPoints - 2; // Reserve space for first and last
+    const interval = Math.max(1, Math.floor((stepCount - 2) / middlePoints));
+
+    // Add evenly distributed middle points
+    for (let i = interval; i < stepCount - 1; i += interval) {
+      sampled.push(steps[i]);
+    }
+
+    // Always include the last step (avoid duplicate)
+    if (steps[stepCount - 1] !== sampled[sampled.length - 1]) {
+      sampled.push(steps[stepCount - 1]);
+    }
+  }
+
+  return sampled.sort((a, b) => a - b);
+};
+
 export const prepareChartData = (
   experiments: ProcessedExperiment[],
   selectedExperimentIds: string[],
@@ -25,8 +66,11 @@ export const prepareChartData = (
 
   const sortedSteps = Array.from(allSteps).sort((a, b) => a - b);
 
-  // Create chart data points
-  const chartData: ChartDataPoint[] = sortedSteps.map((step) => {
+  // Apply smart sampling for large datasets
+  const sampledSteps = sampleSteps(sortedSteps);
+
+  // Create chart data points using sampled steps
+  const chartData: ChartDataPoint[] = sampledSteps.map((step) => {
     const dataPoint: ChartDataPoint = { step };
 
     selectedExperiments.forEach((exp) => {

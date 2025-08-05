@@ -12,6 +12,9 @@ interface ExperimentStore extends AppState {
   setError: (error: string | null) => void;
   setUploadedFile: (file: File | null) => void;
   clearData: () => void;
+  // Add flag for large dataset warning
+  isLargeDataset: boolean;
+  setLargeDatasetFlag: (isLarge: boolean) => void;
 }
 
 const initialState: AppState = {
@@ -22,15 +25,28 @@ const initialState: AppState = {
   uploadedFile: null,
 };
 
+const initialStoreState = {
+  ...initialState,
+  isLargeDataset: false,
+};
+
 export const useExperimentStore = create<ExperimentStore>()(
   persist(
     (set, get) => ({
-      ...initialState,
+      ...initialStoreState,
 
       setExperiments: (experiments) => {
+        // Check if dataset is large
+        const totalDataPoints = experiments.reduce(
+          (sum, exp) => sum + exp.dataPoints.length,
+          0
+        );
+        const isLarge = totalDataPoints > 10000;
+
         set({
           experiments,
           error: null,
+          isLargeDataset: isLarge,
           // Auto-select first experiment if none selected
           selectedExperiments:
             experiments.length > 0 && get().selectedExperiments.length === 0
@@ -73,17 +89,70 @@ export const useExperimentStore = create<ExperimentStore>()(
         set({ uploadedFile });
       },
 
+      setLargeDatasetFlag: (isLarge) => {
+        set({ isLargeDataset: isLarge });
+      },
+
       clearData: () => {
-        set(initialState);
+        set(initialStoreState);
       },
     }),
     {
       name: "experiment-store",
-      // Only persist experiments and selectedExperiments, not loading states
+      // Only persist selectedExperiments for large datasets to avoid localStorage quota
+      // Experiments data will be cleared on page refresh (user needs to re-upload)
       partialize: (state) => ({
-        experiments: state.experiments,
         selectedExperiments: state.selectedExperiments,
+        // Don't persist experiments to avoid localStorage quota issues with large datasets
       }),
+      // Add storage size check and fallback
+      storage: {
+        getItem: (key) => {
+          try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : null;
+          } catch (error) {
+            console.warn("Error reading from localStorage:", error);
+            return null;
+          }
+        },
+        setItem: (key, value) => {
+          try {
+            const serialized = JSON.stringify(value);
+            // Check size (rough estimate: 2 bytes per character)
+            const sizeInMB = (serialized.length * 2) / (1024 * 1024);
+
+            if (sizeInMB > 4) {
+              // Keep under 5MB limit
+              console.warn(
+                "Data too large for localStorage, skipping persistence"
+              );
+              return;
+            }
+
+            localStorage.setItem(key, serialized);
+          } catch (error) {
+            console.warn("Failed to save to localStorage:", error);
+            // Clear storage and try again with minimal data
+            try {
+              localStorage.removeItem(key);
+              localStorage.setItem(
+                key,
+                JSON.stringify({ selectedExperiments: [] })
+              );
+            } catch (fallbackError) {
+              console.error("Critical localStorage error:", fallbackError);
+            }
+          }
+        },
+        removeItem: (key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch (error) {
+            console.warn("Error removing from localStorage:", error);
+          }
+        },
+      },
     }
   )
 );
