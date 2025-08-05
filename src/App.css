@@ -1,42 +1,96 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Global App Styles */
+.app {
+  min-height: 100vh;
+  background-color: #f8f9fa;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Custom chart styling */
+.chart-container .recharts-cartesian-grid-horizontal line,
+.chart-container .recharts-cartesian-grid-vertical line {
+  stroke-opacity: 0.5;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* File upload component styling */
+.file-upload-component .p-fileupload-content {
+  border: 2px dashed #dee2e6;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+
+.file-upload-component .p-fileupload-content:hover {
+  border-color: #6366f1;
+}
+
+/* Experiment table styling */
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  padding: 1rem 0.75rem;
+  font-weight: 600;
+}
+
+/* Chart card styling */
+.p-card .p-card-content {
+  padding: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid .col-12 {
+    padding: 0.5rem;
   }
-  to {
-    transform: rotate(360deg);
+
+  .p-toolbar .p-toolbar-group-start,
+  .p-toolbar .p-toolbar-group-end {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Loading states */
+.loading-overlay {
+  position: relative;
 }
 
-.card {
-  padding: 2em;
+.loading-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-.read-the-docs {
-  color: #888;
+/* Accessibility improvements */
+.p-button:focus,
+.p-inputtext:focus,
+.p-checkbox:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for tables */
+.p-datatable-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.p-datatable-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.p-datatable-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.p-datatable-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
