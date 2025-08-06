@@ -1,0 +1,28 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="180" height="180" rx="20" fill="#1976d2"/>
+  
+  <!-- Chart line -->
+  <path d="M30 135L50 105L70 115L90 80L110 90L130 60L150 45" 
+        stroke="white" 
+        stroke-width="8" 
+        stroke-linecap="round" 
+        fill="none"/>
+  
+  <!-- Data points -->
+  <circle cx="30" cy="135" r="6" fill="white"/>
+  <circle cx="50" cy="105" r="6" fill="white"/>
+  <circle cx="70" cy="115" r="6" fill="white"/>
+  <circle cx="90" cy="80" r="6" fill="white"/>
+  <circle cx="110" cy="90" r="6" fill="white"/>
+  <circle cx="130" cy="60" r="6" fill="white"/>
+  <circle cx="150" cy="45" r="6" fill="white"/>
+  
+  <!-- Grid lines for professional look -->
+  <defs>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="180" height="180" fill="url(#grid)" />
+</svg>
