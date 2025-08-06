@@ -8,15 +8,5 @@ export default defineConfig({
   build: {
     outDir: "dist",
     assetsDir: "assets",
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-          ui: ["primereact", "primeicons", "primeflex"],
-          charts: ["recharts"],
-          utils: ["zustand", "react-papaparse"],
-        },
-      },
-    },
   },
 });
