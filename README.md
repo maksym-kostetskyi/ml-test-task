@@ -125,14 +125,6 @@ src/
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
-### Key Dependencies
-
-- **primereact**: UI component library
-- **recharts**: Chart library for React
-- **zustand**: Lightweight state management
-- **react-papaparse**: CSV parsing library
-- **primeflex**: CSS utility framework
-
 ## Features in Detail
 
 ### File Upload
@@ -167,33 +159,3 @@ src/
 ## License
 
 This project is licensed under the MIT License.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-   {
-   files: ['**/*.{ts,tsx}'],
-   extends: [
-   // Other configs...
-   // Enable lint rules for React
-   reactX.configs['recommended-typescript'],
-   // Enable lint rules for React DOM
-   reactDom.configs.recommended,
-   ],
-   languageOptions: {
-   parserOptions: {
-   project: ['./tsconfig.node.json', './tsconfig.app.json'],
-   tsconfigRootDir: import.meta.dirname,
-   },
-   // other options...
-   },
-   },
-   ])
-
-```
-
-```
