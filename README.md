@@ -2,6 +2,10 @@
 
 A React-based web application for uploading, inspecting, and comparing machine learning experiment logs. Built with React, TypeScript, PrimeReact, and Recharts.
 
+## Live demo
+
+🚀 https://maksym-kostetskyi.github.io/ml-test-task/ 
+
 ## Features
 
 ### Core Features
